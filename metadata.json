@@ -1,0 +1,6 @@
+{
+  "name": "Lexicon",
+  "description": "A personal English learning app for vocabulary, grammar, and idioms with Spaced Repetition System (SRS).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
