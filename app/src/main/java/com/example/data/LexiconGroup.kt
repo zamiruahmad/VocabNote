@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class LexiconGroup(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val name: String,
-    val colorHex: String
+    val colorHex: String,
+    val iconIndex: Int = 0
 )

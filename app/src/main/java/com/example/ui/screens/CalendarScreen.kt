@@ -28,6 +28,10 @@ import com.example.data.Item
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.ui.components.SidebarOutlinedIcon
+import com.example.ui.LocalDrawerState
+import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(viewModel: LexiconViewModel) {
@@ -36,6 +40,9 @@ fun CalendarScreen(viewModel: LexiconViewModel) {
 
     var currentMonth by remember { mutableStateOf(Calendar.getInstance()) }
     var selectedDate by remember { mutableStateOf<Calendar?>(null) }
+
+    val drawerState = LocalDrawerState.current
+    val scope = rememberCoroutineScope()
 
     val monthFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
     val monthTitle = monthFormat.format(currentMonth.time)
@@ -67,6 +74,11 @@ fun CalendarScreen(viewModel: LexiconViewModel) {
         topBar = {
             TopAppBar(
                 title = { Text("Calendar") },
+                navigationIcon = {
+                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                        SidebarOutlinedIcon(contentDescription = "Menu")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
             )
         }

@@ -30,6 +30,12 @@ class LexiconViewModel(application: Application) : AndroidViewModel(application)
     private val _filterGroupId = MutableStateFlow<Long?>(null)
     val filterGroupId: StateFlow<Long?> = _filterGroupId
 
+    private val _customCategories = MutableStateFlow(settings.categoriesString.split(",").filter { it.isNotBlank() })
+    val customCategories: StateFlow<List<String>> = _customCategories
+
+    private val _customLanguages = MutableStateFlow(settings.languagesString.split(",").filter { it.isNotBlank() })
+    val customLanguages: StateFlow<List<String>> = _customLanguages
+
     val allGroups: StateFlow<List<LexiconGroup>> = repository.allGroups
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -100,6 +106,16 @@ class LexiconViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             repository.deleteGroup(id)
         }
+    }
+    
+    fun updateCategories(newList: List<String>) {
+        _customCategories.value = newList
+        settings.categoriesString = newList.joinToString(",")
+    }
+
+    fun updateLanguages(newList: List<String>) {
+        _customLanguages.value = newList
+        settings.languagesString = newList.joinToString(",")
     }
     
     val revisionItems: StateFlow<List<Item>> = repository.getItemsForRevision(System.currentTimeMillis())
