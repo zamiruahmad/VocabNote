@@ -129,7 +129,7 @@ fun ItemsScreen(viewModel: LexiconViewModel, navController: NavController) {
                 }
             }
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
