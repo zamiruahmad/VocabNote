@@ -8,5 +8,6 @@ data class LexiconGroup(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val name: String,
     val colorHex: String,
-    val iconIndex: Int = 0
+    val iconIndex: Int = 0,
+    val category: String = "Other"
 )

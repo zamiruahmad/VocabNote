@@ -72,6 +72,7 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
     val allGroups by viewModel.allGroups.collectAsStateWithLifecycle()
     val filterGroupId by viewModel.filterGroupId.collectAsStateWithLifecycle()
     val repositoryItems by viewModel.items.collectAsStateWithLifecycle()
+    val showBottomNav by viewModel.showBottomNav.collectAsStateWithLifecycle()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -95,8 +96,7 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
                         Text(
                             "VocabNote", 
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = com.example.ui.theme.appFontFamily
+                            fontWeight = FontWeight.Bold
                         )
                     }
                     IconButton(
@@ -189,69 +189,71 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
         CompositionLocalProvider(LocalDrawerState provides drawerState) {
             Scaffold(
                 bottomBar = {
-                    val navBarColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
-                    val selectedPillColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
-                    val selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    val defaultIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    if (showBottomNav) {
+                        val navBarColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
+                        val selectedPillColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+                        val selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        val defaultIconColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-                    Row(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .padding(horizontal = 24.dp, vertical = 24.dp)
-                            .fillMaxWidth()
-                            .height(68.dp)
-                            .shadow(elevation = 8.dp, shape = RoundedCornerShape(34.dp), spotColor = Color.Black.copy(alpha = 0.05f))
-                            .clip(RoundedCornerShape(34.dp))
-                            .background(navBarColor)
-                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(34.dp)),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        navItems.forEach { screen ->
-                            val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                            val color by androidx.compose.animation.animateColorAsState(
-                                targetValue = if (selected) selectedIconColor else defaultIconColor,
-                                animationSpec = androidx.compose.animation.core.tween(300),
-                                label = "color"
-                            )
-                            
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null
-                                    ) {
-                                        navController.navigate(screen.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val backgroundAlpha by androidx.compose.animation.core.animateFloatAsState(
-                                    targetValue = if (selected) 1f else 0f,
+                        Row(
+                            modifier = Modifier
+                                .navigationBarsPadding()
+                                .padding(horizontal = 24.dp, vertical = 24.dp)
+                                .fillMaxWidth()
+                                .height(68.dp)
+                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(34.dp), spotColor = Color.Black.copy(alpha = 0.05f))
+                                .clip(RoundedCornerShape(34.dp))
+                                .background(navBarColor)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(34.dp)),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            navItems.forEach { screen ->
+                                val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                                val color by androidx.compose.animation.animateColorAsState(
+                                    targetValue = if (selected) selectedIconColor else defaultIconColor,
                                     animationSpec = androidx.compose.animation.core.tween(300),
-                                    label = "alpha"
+                                    label = "color"
                                 )
+                                
                                 Box(
                                     modifier = Modifier
-                                        .height(52.dp)
-                                        .fillMaxWidth(0.85f)
-                                        .clip(RoundedCornerShape(26.dp))
-                                        .background(selectedPillColor.copy(alpha = backgroundAlpha)),
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) {
+                                            navController.navigate(screen.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        imageVector = screen.icon,
-                                        contentDescription = screen.title,
-                                        tint = color,
-                                        modifier = Modifier.size(26.dp)
+                                    val backgroundAlpha by androidx.compose.animation.core.animateFloatAsState(
+                                        targetValue = if (selected) 1f else 0f,
+                                        animationSpec = androidx.compose.animation.core.tween(300),
+                                        label = "alpha"
                                     )
+                                    Box(
+                                        modifier = Modifier
+                                            .height(52.dp)
+                                            .fillMaxWidth(0.85f)
+                                            .clip(RoundedCornerShape(26.dp))
+                                            .background(selectedPillColor.copy(alpha = backgroundAlpha)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = screen.icon,
+                                            contentDescription = screen.title,
+                                            tint = color,
+                                            modifier = Modifier.size(26.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

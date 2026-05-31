@@ -36,6 +36,21 @@ class LexiconViewModel(application: Application) : AndroidViewModel(application)
     private val _customLanguages = MutableStateFlow(settings.languagesString.split(",").filter { it.isNotBlank() })
     val customLanguages: StateFlow<List<String>> = _customLanguages
 
+    private val _showBottomNav = MutableStateFlow(settings.showBottomNav)
+    val showBottomNav: StateFlow<Boolean> = _showBottomNav
+
+    private val _activeTheme = MutableStateFlow(settings.activeTheme)
+    val activeTheme: StateFlow<String> = _activeTheme
+
+    private val _activeFont = MutableStateFlow(settings.activeFont)
+    val activeFont: StateFlow<String> = _activeFont
+
+    private val _activeAppLanguage = MutableStateFlow(settings.activeAppLanguage)
+    val activeAppLanguage: StateFlow<String> = _activeAppLanguage
+
+    private val _darkMode = MutableStateFlow(settings.darkMode)
+    val darkMode: StateFlow<String> = _darkMode
+
     val allGroups: StateFlow<List<LexiconGroup>> = repository.allGroups
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -116,6 +131,31 @@ class LexiconViewModel(application: Application) : AndroidViewModel(application)
     fun updateLanguages(newList: List<String>) {
         _customLanguages.value = newList
         settings.languagesString = newList.joinToString(",")
+    }
+
+    fun updateShowBottomNav(show: Boolean) {
+        _showBottomNav.value = show
+        settings.showBottomNav = show
+    }
+
+    fun updateActiveTheme(theme: String) {
+        _activeTheme.value = theme
+        settings.activeTheme = theme
+    }
+
+    fun updateActiveFont(font: String) {
+        _activeFont.value = font
+        settings.activeFont = font
+    }
+
+    fun updateActiveAppLanguage(lang: String) {
+        _activeAppLanguage.value = lang
+        settings.activeAppLanguage = lang
+    }
+
+    fun updateDarkMode(mode: String) {
+        _darkMode.value = mode
+        settings.darkMode = mode
     }
     
     val revisionItems: StateFlow<List<Item>> = repository.getItemsForRevision(System.currentTimeMillis())

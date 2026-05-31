@@ -46,7 +46,7 @@ fun SettingsScreen(viewModel: LexiconViewModel) {
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Settings & Management", fontWeight = FontWeight.Black, fontFamily = com.example.ui.theme.appFontFamily) },
+                    title = { Text("Settings & Management", fontWeight = FontWeight.Black) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             SidebarOutlinedIcon(contentDescription = "Menu")
@@ -80,14 +80,46 @@ fun SettingsScreen(viewModel: LexiconViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingsTab(viewModel: LexiconViewModel) {
     val items by viewModel.items.collectAsStateWithLifecycle()
+    val showBottomNav by viewModel.showBottomNav.collectAsStateWithLifecycle()
+    val activeTheme by viewModel.activeTheme.collectAsStateWithLifecycle()
+    val activeFont by viewModel.activeFont.collectAsStateWithLifecycle()
+    val activeAppLanguage by viewModel.activeAppLanguage.collectAsStateWithLifecycle()
+    val darkMode by viewModel.darkMode.collectAsStateWithLifecycle()
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        item {
+            Text("UI Configuration", style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Show Bottom Navigation", style = MaterialTheme.typography.bodyLarge)
+                        Switch(
+                            checked = showBottomNav,
+                            onCheckedChange = { viewModel.updateShowBottomNav(it) }
+                        )
+                    }
+
+                    DropdownSettingRow("Theme", activeTheme, listOf("Blue", "Green", "Purple", "Orange", "Red")) { viewModel.updateActiveTheme(it) }
+                    DropdownSettingRow("Font", activeFont, listOf("Default", "Serif", "Monospace")) { viewModel.updateActiveFont(it) }
+                    DropdownSettingRow("Language", activeAppLanguage, listOf("English", "Bengali", "Spanish")) { viewModel.updateActiveAppLanguage(it) }
+                    DropdownSettingRow("Dark Mode", darkMode, listOf("System", "Light", "Dark")) { viewModel.updateDarkMode(it) }
+                }
+            }
+        }
+
         item {
             Text("Stats Overview", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(16.dp))
@@ -103,13 +135,52 @@ fun GeneralSettingsTab(viewModel: LexiconViewModel) {
 }
 
 @Composable
+fun DropdownSettingRow(label: String, currentValue: String, options: List<String>, onSelection: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Box {
+            TextButton(onClick = { expanded = true }) {
+                Text(currentValue)
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = { 
+                            onSelection(option)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun GroupsManagementTab(viewModel: LexiconViewModel) {
     val allGroups by viewModel.allGroups.collectAsStateWithLifecycle()
+    val customCategories by viewModel.customCategories.collectAsStateWithLifecycle()
     val items by viewModel.items.collectAsStateWithLifecycle()
     var newGroupName by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("") }
+    var categoryExpanded by remember { mutableStateOf(false) }
     var selectedIconIndex by remember { mutableStateOf(0) }
     val groupColors = listOf("#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444")
     
+    // Default selected category when loaded if empty
+    LaunchedEffect(customCategories) {
+        if (selectedCategory.isEmpty() && customCategories.isNotEmpty()) {
+            selectedCategory = customCategories.first()
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -125,6 +196,35 @@ fun GroupsManagementTab(viewModel: LexiconViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = { categoryExpanded = it }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedCategory,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Category") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = { categoryExpanded = false }
+                        ) {
+                            val availableCategories = if (customCategories.isEmpty()) listOf("Movie", "Song", "Comics", "Newspaper", "Poster", "Drama", "Other") else customCategories
+                            availableCategories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category) },
+                                    onClick = {
+                                        selectedCategory = category
+                                        categoryExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     
                     Text("Select Icon:", style = MaterialTheme.typography.bodyMedium)
                     LazyRow(
@@ -153,7 +253,7 @@ fun GroupsManagementTab(viewModel: LexiconViewModel) {
                     Button(
                         onClick = {
                             if (newGroupName.isNotBlank()) {
-                                viewModel.insertGroup(LexiconGroup(name = newGroupName, colorHex = groupColors.random(), iconIndex = selectedIconIndex))
+                                viewModel.insertGroup(LexiconGroup(name = newGroupName, category = selectedCategory.ifEmpty { "Other" }, colorHex = groupColors.random(), iconIndex = selectedIconIndex))
                                 newGroupName = ""
                                 selectedIconIndex = 0
                             }
@@ -187,7 +287,7 @@ fun GroupsManagementTab(viewModel: LexiconViewModel) {
                         }
                         Column {
                             Text(group.name, style = MaterialTheme.typography.titleMedium)
-                            Text("$groupItemCount items", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${group.category} • $groupItemCount items", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     IconButton(onClick = { viewModel.deleteGroup(group.id) }) {

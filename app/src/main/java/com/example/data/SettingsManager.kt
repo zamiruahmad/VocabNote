@@ -25,4 +25,24 @@ class SettingsManager(context: Context) {
     var languagesString: String
         get() = prefs.getString("custom_languages", "English,Bengali,Arabic,French,Spanish,German,Chinese,Japanese") ?: "English,Bengali,Arabic,French,Spanish,German,Chinese,Japanese"
         set(value) = prefs.edit().putString("custom_languages", value).apply()
+
+    var showBottomNav: Boolean
+        get() = prefs.getBoolean("show_bottom_nav", true)
+        set(value) = prefs.edit().putBoolean("show_bottom_nav", value).apply()
+
+    var activeTheme: String
+        get() = prefs.getString("active_theme", "Blue") ?: "Blue"
+        set(value) = prefs.edit().putString("active_theme", value).apply()
+
+    var activeFont: String
+        get() = prefs.getString("active_font", "Default") ?: "Default"
+        set(value) = prefs.edit().putString("active_font", value).apply()
+
+    var activeAppLanguage: String
+        get() = prefs.getString("active_app_language", "English") ?: "English"
+        set(value) = prefs.edit().putString("active_app_language", value).apply()
+
+    var darkMode: String
+        get() = prefs.getString("dark_mode", "System") ?: "System"
+        set(value) = prefs.edit().putString("dark_mode", value).apply()
 }

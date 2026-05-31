@@ -80,8 +80,7 @@ fun ItemsScreen(viewModel: LexiconViewModel, navController: NavController) {
                     title = { 
                         Text(
                             text = if (filterGroupId == null) "VocabNote (${items.size})" else "${allGroups.find { it.id == filterGroupId }?.name ?: "VocabNote"} (${items.size})",
-                            fontWeight = FontWeight.Black,
-                            fontFamily = com.example.ui.theme.appFontFamily
+                            fontWeight = FontWeight.Black
                         ) 
                     },
                     navigationIcon = {
