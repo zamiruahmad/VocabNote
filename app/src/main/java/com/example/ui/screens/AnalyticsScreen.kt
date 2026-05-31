@@ -200,9 +200,9 @@ fun OverviewCard(
                 Canvas(modifier = Modifier.weight(1f).height(24.dp).padding(start = 16.dp)) {
                     val path = Path()
                     path.moveTo(0f, size.height / 2)
-                    path.quadraticBezierTo(size.width * 0.2f, 0f, size.width * 0.4f, size.height / 2)
-                    path.quadraticBezierTo(size.width * 0.6f, size.height, size.width * 0.8f, size.height / 2)
-                    path.quadraticBezierTo(size.width * 0.9f, 0f, size.width, size.height / 2)
+                    path.quadraticTo(size.width * 0.2f, 0f, size.width * 0.4f, size.height / 2)
+                    path.quadraticTo(size.width * 0.6f, size.height, size.width * 0.8f, size.height / 2)
+                    path.quadraticTo(size.width * 0.9f, 0f, size.width, size.height / 2)
                     
                     drawPath(
                         path = path,

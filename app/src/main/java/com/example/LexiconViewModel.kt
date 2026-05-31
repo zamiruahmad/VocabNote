@@ -33,6 +33,9 @@ class LexiconViewModel(application: Application) : AndroidViewModel(application)
     private val _customCategories = MutableStateFlow(settings.categoriesString.split(",").filter { it.isNotBlank() })
     val customCategories: StateFlow<List<String>> = _customCategories
 
+    private val _customGroupTypes = MutableStateFlow(settings.groupTypesString.split(",").filter { it.isNotBlank() })
+    val customGroupTypes: StateFlow<List<String>> = _customGroupTypes
+
     private val _customLanguages = MutableStateFlow(settings.languagesString.split(",").filter { it.isNotBlank() })
     val customLanguages: StateFlow<List<String>> = _customLanguages
 
@@ -126,6 +129,11 @@ class LexiconViewModel(application: Application) : AndroidViewModel(application)
     fun updateCategories(newList: List<String>) {
         _customCategories.value = newList
         settings.categoriesString = newList.joinToString(",")
+    }
+
+    fun updateGroupTypes(newList: List<String>) {
+        _customGroupTypes.value = newList
+        settings.groupTypesString = newList.joinToString(",")
     }
 
     fun updateLanguages(newList: List<String>) {

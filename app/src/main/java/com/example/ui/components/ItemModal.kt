@@ -109,7 +109,7 @@ fun ItemModal(
                                         leadingIcon = { Icon(Icons.Default.Add, contentDescription = "Category") },
                                         label = { Text("Category") },
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
-                                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                        modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                                         singleLine = true
                                     )
                                     ExposedDropdownMenu(
@@ -141,7 +141,7 @@ fun ItemModal(
                                         readOnly = true,
                                         label = { Text("Language") },
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLanguage) },
-                                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                        modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                                         singleLine = true
                                     )
                                     ExposedDropdownMenu(
@@ -264,7 +264,7 @@ fun ItemModal(
                                 },
                                 label = { Text("Group / Subgroup") },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedGroup) },
-                                modifier = Modifier.menuAnchor().fillMaxWidth()
+                                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
                             )
                             ExposedDropdownMenu(
                                 expanded = expandedGroup,

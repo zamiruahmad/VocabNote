@@ -22,6 +22,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("custom_categories", "Vocabulary,Grammar,Proverb,Sentence,Expression,Idiom,Question,Other") ?: "Vocabulary,Grammar,Proverb,Sentence,Expression,Idiom,Question,Other"
         set(value) = prefs.edit().putString("custom_categories", value).apply()
 
+    var groupTypesString: String
+        get() = prefs.getString("custom_group_types", "Movie,Song,Comics,Newspaper,Poster,Drama,Other") ?: "Movie,Song,Comics,Newspaper,Poster,Drama,Other"
+        set(value) = prefs.edit().putString("custom_group_types", value).apply()
+
     var languagesString: String
         get() = prefs.getString("custom_languages", "English,Bengali,Arabic,French,Spanish,German,Chinese,Japanese") ?: "English,Bengali,Arabic,French,Spanish,German,Chinese,Japanese"
         set(value) = prefs.edit().putString("custom_languages", value).apply()

@@ -33,6 +33,7 @@ fun SettingsScreen(viewModel: LexiconViewModel) {
     val items by viewModel.items.collectAsStateWithLifecycle()
     val allGroups by viewModel.allGroups.collectAsStateWithLifecycle()
     val customCategories by viewModel.customCategories.collectAsStateWithLifecycle()
+    val customGroupTypes by viewModel.customGroupTypes.collectAsStateWithLifecycle()
     val customLanguages by viewModel.customLanguages.collectAsStateWithLifecycle()
     
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -40,7 +41,7 @@ fun SettingsScreen(viewModel: LexiconViewModel) {
     val drawerState = LocalDrawerState.current
     val scope = rememberCoroutineScope()
     
-    val tabs = listOf("General", "Groups", "Categories", "Languages")
+    val tabs = listOf("General", "Groups", "Group Types", "Categories", "Languages")
 
     Scaffold(
         topBar = {
@@ -73,8 +74,9 @@ fun SettingsScreen(viewModel: LexiconViewModel) {
             when (selectedTabIndex) {
                 0 -> GeneralSettingsTab(viewModel)
                 1 -> GroupsManagementTab(viewModel)
-                2 -> StringListManagementTab("Category", customCategories) { newList -> viewModel.updateCategories(newList) }
-                3 -> StringListManagementTab("Language", customLanguages) { newList -> viewModel.updateLanguages(newList) }
+                2 -> StringListManagementTab("Group Type", customGroupTypes) { newList -> viewModel.updateGroupTypes(newList) }
+                3 -> StringListManagementTab("Category", customCategories) { newList -> viewModel.updateCategories(newList) }
+                4 -> StringListManagementTab("Language", customLanguages) { newList -> viewModel.updateLanguages(newList) }
             }
         }
     }
@@ -166,18 +168,18 @@ fun DropdownSettingRow(label: String, currentValue: String, options: List<String
 @Composable
 fun GroupsManagementTab(viewModel: LexiconViewModel) {
     val allGroups by viewModel.allGroups.collectAsStateWithLifecycle()
-    val customCategories by viewModel.customCategories.collectAsStateWithLifecycle()
+    val customGroupTypes by viewModel.customGroupTypes.collectAsStateWithLifecycle()
     val items by viewModel.items.collectAsStateWithLifecycle()
     var newGroupName by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("") }
-    var categoryExpanded by remember { mutableStateOf(false) }
+    var selectedGroupType by remember { mutableStateOf("") }
+    var groupTypeExpanded by remember { mutableStateOf(false) }
     var selectedIconIndex by remember { mutableStateOf(0) }
     val groupColors = listOf("#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444")
     
-    // Default selected category when loaded if empty
-    LaunchedEffect(customCategories) {
-        if (selectedCategory.isEmpty() && customCategories.isNotEmpty()) {
-            selectedCategory = customCategories.first()
+    // Default selected group type when loaded if empty
+    LaunchedEffect(customGroupTypes) {
+        if (selectedGroupType.isEmpty() && customGroupTypes.isNotEmpty()) {
+            selectedGroupType = customGroupTypes.first()
         }
     }
 
@@ -198,28 +200,28 @@ fun GroupsManagementTab(viewModel: LexiconViewModel) {
                     )
                     
                     ExposedDropdownMenuBox(
-                        expanded = categoryExpanded,
-                        onExpandedChange = { categoryExpanded = it }
+                        expanded = groupTypeExpanded,
+                        onExpandedChange = { groupTypeExpanded = it }
                     ) {
                         OutlinedTextField(
-                            value = selectedCategory,
+                            value = selectedGroupType,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Category") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                            label = { Text("Group Type") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = groupTypeExpanded) },
+                            modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
                         )
                         ExposedDropdownMenu(
-                            expanded = categoryExpanded,
-                            onDismissRequest = { categoryExpanded = false }
+                            expanded = groupTypeExpanded,
+                            onDismissRequest = { groupTypeExpanded = false }
                         ) {
-                            val availableCategories = if (customCategories.isEmpty()) listOf("Movie", "Song", "Comics", "Newspaper", "Poster", "Drama", "Other") else customCategories
-                            availableCategories.forEach { category ->
+                            val availableGroupTypes = if (customGroupTypes.isEmpty()) listOf("Movie", "Song", "Comics", "Newspaper", "Poster", "Drama", "Other") else customGroupTypes
+                            availableGroupTypes.forEach { groupType ->
                                 DropdownMenuItem(
-                                    text = { Text(category) },
+                                    text = { Text(groupType) },
                                     onClick = {
-                                        selectedCategory = category
-                                        categoryExpanded = false
+                                        selectedGroupType = groupType
+                                        groupTypeExpanded = false
                                     }
                                 )
                             }
@@ -253,7 +255,7 @@ fun GroupsManagementTab(viewModel: LexiconViewModel) {
                     Button(
                         onClick = {
                             if (newGroupName.isNotBlank()) {
-                                viewModel.insertGroup(LexiconGroup(name = newGroupName, category = selectedCategory.ifEmpty { "Other" }, colorHex = groupColors.random(), iconIndex = selectedIconIndex))
+                                viewModel.insertGroup(LexiconGroup(name = newGroupName, type = selectedGroupType.ifEmpty { "Other" }, colorHex = groupColors.random(), iconIndex = selectedIconIndex))
                                 newGroupName = ""
                                 selectedIconIndex = 0
                             }
@@ -287,7 +289,7 @@ fun GroupsManagementTab(viewModel: LexiconViewModel) {
                         }
                         Column {
                             Text(group.name, style = MaterialTheme.typography.titleMedium)
-                            Text("${group.category} • $groupItemCount items", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${group.type} • $groupItemCount items", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     IconButton(onClick = { viewModel.deleteGroup(group.id) }) {

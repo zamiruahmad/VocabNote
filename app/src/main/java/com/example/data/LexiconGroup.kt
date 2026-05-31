@@ -9,5 +9,5 @@ data class LexiconGroup(
     val name: String,
     val colorHex: String,
     val iconIndex: Int = 0,
-    val category: String = "Other"
+    val type: String = "Other"
 )
