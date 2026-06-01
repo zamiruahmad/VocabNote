@@ -2,10 +2,10 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val BgDark = Color(0xFF0a0e1a)
-val SurfaceDark = Color(0xFF111827)
-val Surface2Dark = Color(0xFF1a2236)
-val BorderDark = Color(0xFF1e2d45)
+val BgDark = Color(0xFF0A1823)
+val SurfaceDark = Color(0xFF0F2634)
+val Surface2Dark = Color(0xFF153347)
+val BorderDark = Color(0xFF264C63)
 val Primary = Color(0xFF3b82f6)
 val Secondary = Color(0xFF8b5cf6)
 val Success = Color(0xFF10b981)

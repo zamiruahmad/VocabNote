@@ -74,27 +74,72 @@ fun ItemModal(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
     ) {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
+        val glassBorderColor = Color.White.copy(alpha = 0.2f)
+        val glassTextFieldColors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            focusedContainerColor = Color.White.copy(alpha = 0.1f),
+            unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+            focusedBorderColor = Color.White.copy(alpha = 0.3f),
+            unfocusedBorderColor = glassBorderColor,
+            focusedLabelColor = Color.White.copy(alpha = 0.8f),
+            unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
+            focusedLeadingIconColor = Color.White.copy(alpha = 0.9f),
+            unfocusedLeadingIconColor = Color.White.copy(alpha = 0.7f),
+            focusedTrailingIconColor = Color.White.copy(alpha = 0.9f),
+            unfocusedTrailingIconColor = Color.White.copy(alpha = 0.7f),
+            cursorColor = Color.White,
+            errorCursorColor = Color.Red
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    androidx.compose.ui.graphics.Brush.radialGradient(
+                        colors = listOf(Color(0xFF1B4E6B), Color(0xFF0A1823)),
+                        radius = 1500f
+                    )
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+                    .imePadding()
+            ) {
                 TopAppBar(
-                    title = { Text(if (initialItem == null) "Add Item" else "Edit Item") },
+                    title = { 
+                        Text(
+                            if (initialItem == null) "Add Item" else "Edit Item",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White
+                        ) 
+                    },
                     actions = {
-                        TextButton(onClick = onDismiss) { Text("Cancel") }
-                    }
+                        TextButton(onClick = onDismiss) { 
+                            Text("Cancel", style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = 0.8f)) 
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White,
+                        actionIconContentColor = Color.White
+                    )
                 )
 
                 LazyColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // Row for Category (+) and Language (En > Bn)
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             // Category Selection Button Card with (+) inside as sketched
                             Box(modifier = Modifier.weight(1f)) {
@@ -106,11 +151,13 @@ fun ItemModal(
                                         value = category,
                                         onValueChange = {},
                                         readOnly = true,
-                                        leadingIcon = { Icon(Icons.Default.Add, contentDescription = "Category") },
+                                        leadingIcon = { Icon(Icons.Default.Add, contentDescription = "Category", tint = Color.White.copy(alpha = 0.8f)) },
                                         label = { Text("Category") },
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
                                         modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-                                        singleLine = true
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = glassTextFieldColors
                                     )
                                     ExposedDropdownMenu(
                                         expanded = expandedCategory,
@@ -142,7 +189,9 @@ fun ItemModal(
                                         label = { Text("Language") },
                                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLanguage) },
                                         modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-                                        singleLine = true
+                                        singleLine = true,
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = glassTextFieldColors
                                     )
                                     ExposedDropdownMenu(
                                         expanded = expandedLanguage,
@@ -169,7 +218,11 @@ fun ItemModal(
                             value = word,
                             onValueChange = { word = it },
                             label = { Text("Word / Sentence / Phrase *") },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.titleMedium,
+                            colors = glassTextFieldColors
                         )
                     }
 
@@ -180,7 +233,10 @@ fun ItemModal(
                             onValueChange = { meaning = it },
                             label = { Text("Meaning *") },
                             modifier = Modifier.fillMaxWidth(),
-                            minLines = 3
+                            minLines = 3,
+                            shape = RoundedCornerShape(16.dp),
+                            textStyle = MaterialTheme.typography.bodyLarge,
+                            colors = glassTextFieldColors
                         )
                     }
 
@@ -188,35 +244,36 @@ fun ItemModal(
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                            border = BorderStroke(1.dp, glassBorderColor)
                         ) {
                             Row(
-                                modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.Top
                             ) {
                                 // Picture picker button box labeled + Pic
                                 Box(
                                     modifier = Modifier
-                                        .size(88.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(MaterialTheme.colorScheme.surface)
-                                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
+                                        .size(96.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(Color.White.copy(alpha = 0.1f))
+                                        .border(1.dp, glassBorderColor, RoundedCornerShape(16.dp))
                                         .clickable { photoPickerLauncher.launch("image/*") },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (imageUrl.isBlank()) {
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Icon(Icons.Default.Add, contentDescription = "Add Pic", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                                            Icon(Icons.Default.Add, contentDescription = "Add Pic", tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(28.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Pic", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text("Pic", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.7f))
                                         }
                                     } else {
                                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(4.dp)) {
-                                            Icon(Icons.Default.Image, contentDescription = "Has Picture", tint = MaterialTheme.colorScheme.primary)
+                                            Icon(Icons.Default.Image, contentDescription = "Has Picture", tint = Color.White, modifier = Modifier.size(28.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Selected", style = MaterialTheme.typography.labelSmall, maxLines = 1, textAlign = TextAlign.Center)
+                                            Text("Selected", style = MaterialTheme.typography.labelSmall, maxLines = 1, textAlign = TextAlign.Center, color = Color.White)
                                         }
                                     }
                                 }
@@ -225,12 +282,14 @@ fun ItemModal(
                                 OutlinedTextField(
                                     value = note,
                                     onValueChange = { note = it },
-                                    label = { Text("Note / Links / Source") },
+                                    label = { Text("Notes & Links") },
                                     modifier = Modifier
                                         .weight(1f)
-                                        .defaultMinSize(minHeight = 88.dp),
+                                        .defaultMinSize(minHeight = 96.dp),
                                     maxLines = 5,
-                                    textStyle = MaterialTheme.typography.bodyMedium
+                                    textStyle = MaterialTheme.typography.bodyMedium,
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = glassTextFieldColors
                                 )
                             }
                         }
@@ -259,12 +318,14 @@ fun ItemModal(
                                         val c = try { Color(android.graphics.Color.parseColor(selectedGroup.colorHex)) } catch(e:Exception){ MaterialTheme.colorScheme.primary }
                                         Icon(leadingIconVector, contentDescription = "Group Icon", tint = c)
                                     } else {
-                                        Icon(leadingIconVector, contentDescription = "Add Group")
+                                        Icon(leadingIconVector, contentDescription = "Add Group", tint = Color.White.copy(alpha = 0.8f))
                                     }
                                 },
                                 label = { Text("Group / Subgroup") },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedGroup) },
-                                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                                modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = glassTextFieldColors
                             )
                             ExposedDropdownMenu(
                                 expanded = expandedGroup,
@@ -294,42 +355,55 @@ fun ItemModal(
                             }
                         }
                     }
+                    
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
                 }
 
                 // Centered Save Button at the bottom
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.05f))
                 ) {
-                    Button(
-                        onClick = {
-                            if (word.isNotBlank() && meaning.isNotBlank()) {
-                                val newItem = Item(
-                                    id = initialItem?.id ?: 0L,
-                                    category = category,
-                                    word = word,
-                                    meaning = meaning,
-                                    language = language.ifBlank { null },
-                                    source = source.ifBlank { null },
-                                    imageUrl = imageUrl.ifBlank { null },
-                                    note = note.ifBlank { null },
-                                    link = link.ifBlank { null },
-                                    groupId = groupId,
-                                    mastery = initialItem?.mastery ?: 0,
-                                    nextRevision = initialItem?.nextRevision ?: System.currentTimeMillis(),
-                                    reviewCount = initialItem?.reviewCount ?: 0,
-                                    createdAt = initialItem?.createdAt ?: System.currentTimeMillis()
-                                )
-                                onSave(newItem)
-                            }
-                        },
-                        enabled = word.isNotBlank() && meaning.isNotBlank(),
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
-                        shape = RoundedCornerShape(12.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Save", style = MaterialTheme.typography.titleMedium)
+                        Button(
+                            onClick = {
+                                if (word.isNotBlank() && meaning.isNotBlank()) {
+                                    val newItem = Item(
+                                        id = initialItem?.id ?: 0L,
+                                        category = category,
+                                        word = word,
+                                        meaning = meaning,
+                                        language = language.ifBlank { null },
+                                        source = source.ifBlank { null },
+                                        imageUrl = imageUrl.ifBlank { null },
+                                        note = note.ifBlank { null },
+                                        link = link.ifBlank { null },
+                                        groupId = groupId,
+                                        mastery = initialItem?.mastery ?: 0,
+                                        nextRevision = initialItem?.nextRevision ?: System.currentTimeMillis(),
+                                        reviewCount = initialItem?.reviewCount ?: 0,
+                                        createdAt = initialItem?.createdAt ?: System.currentTimeMillis()
+                                    )
+                                    onSave(newItem)
+                                }
+                            },
+                            enabled = word.isNotBlank() && meaning.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Text("Save Entry", style = MaterialTheme.typography.titleMedium)
+                        }
                     }
                 }
             }

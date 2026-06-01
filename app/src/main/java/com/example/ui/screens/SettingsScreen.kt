@@ -2,6 +2,8 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -9,6 +11,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +30,11 @@ import kotlinx.coroutines.launch
 import com.example.ui.components.SidebarOutlinedIcon
 import com.example.ui.LocalDrawerState
 import kotlinx.coroutines.launch
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,26 +53,46 @@ fun SettingsScreen(viewModel: LexiconViewModel) {
     val tabs = listOf("General", "Groups", "Group Types", "Categories", "Languages")
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Settings & Management", fontWeight = FontWeight.Black) },
+                    title = { Text("Settings & Management", fontWeight = FontWeight.Black, color = Color.White) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            SidebarOutlinedIcon(contentDescription = "Menu")
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+                    actions = {
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = "Profile",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
                 ScrollableTabRow(
                     selectedTabIndex = selectedTabIndex,
-                    edgePadding = 16.dp
+                    edgePadding = 16.dp,
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(title) }
+                            text = { Text(title, color = if (selectedTabIndex == index) Color.White else Color.White.copy(alpha = 0.6f)) }
                         )
                     }
                 }
@@ -91,12 +120,39 @@ fun GeneralSettingsTab(viewModel: LexiconViewModel) {
     val activeFont by viewModel.activeFont.collectAsStateWithLifecycle()
     val activeAppLanguage by viewModel.activeAppLanguage.collectAsStateWithLifecycle()
     val darkMode by viewModel.darkMode.collectAsStateWithLifecycle()
+    val dailyReminder by viewModel.dailyReminder.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        item {
+            Text("Reminders", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth().border(1.dp, Color.White.copy(alpha=0.1f), RoundedCornerShape(12.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha=0.05f))
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Daily Practice Reminder", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                            Text("Get a notification to review your lexicon", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha=0.6f))
+                        }
+                        Switch(
+                            checked = dailyReminder,
+                            onCheckedChange = { viewModel.updateDailyReminder(it) }
+                        )
+                    }
+                }
+            }
+        }
+
         item {
             Text("UI Configuration", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(16.dp))
@@ -130,6 +186,29 @@ fun GeneralSettingsTab(viewModel: LexiconViewModel) {
                     StatRow("Total Items", items.size.toString())
                     StatRow("Mastered Items (⭐️ 4+)", items.count { it.mastery >= 4 }.toString())
                     StatRow("Total Revisions Completed", viewModel.settings.totalRevisions.toString())
+                }
+            }
+        }
+
+        item {
+            Text("Data Management", style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            val context = LocalContext.current
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+                uri?.let {
+                    viewModel.importData(context, it) { success, msg ->
+                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text("Import your vocabulary from a CSV or JSON file. For CSV, ensure you have 'word' and 'meaning' header columns.", style = MaterialTheme.typography.bodyMedium)
+                    Button(onClick = { launcher.launch("*/*") }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Import Data")
+                    }
                 }
             }
         }

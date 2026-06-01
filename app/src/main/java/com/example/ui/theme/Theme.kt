@@ -16,7 +16,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = Primary,
     secondary = Secondary,
     tertiary = Success,
-    background = BgDark,
+    background = Color.Transparent,
     surface = SurfaceDark,
     onPrimary = Color.White,
     onSecondary = Color.White,
@@ -32,15 +32,15 @@ private val LightColorScheme = lightColorScheme(
     primary = Primary,
     secondary = Secondary,
     tertiary = Success,
-    background = Color(0xFFF8FAFC),
-    surface = Color.White,
+    background = BgDark,
+    surface = SurfaceDark,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
-    onBackground = Color(0xFF0F172A),
-    onSurface = Color(0xFF0F172A),
-    surfaceVariant = Color(0xFFE2E8F0),
-    outline = Color(0xFFCBD5E1),
+    onBackground = TextColorDark,
+    onSurface = TextColorDark,
+    surfaceVariant = Surface2Dark,
+    outline = BorderDark,
     error = Error
 )
 
@@ -72,15 +72,7 @@ fun MyApplicationTheme(
       else -> androidx.compose.ui.text.font.FontFamily.SansSerif
   }
 
-  val baseColorScheme =
-    when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        val context = LocalContext.current
-        if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      isDark -> DarkColorScheme
-      else -> LightColorScheme
-    }
+  val baseColorScheme = DarkColorScheme
 
   val colorScheme = baseColorScheme.copy(primary = primaryColor)
   

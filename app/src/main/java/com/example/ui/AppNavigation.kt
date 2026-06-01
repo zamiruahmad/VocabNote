@@ -13,16 +13,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.remember
-import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.filled.CrisisAlert
+import androidx.compose.material.icons.outlined.CrisisAlert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,18 +52,24 @@ import com.example.LexiconViewModel
 import com.example.ui.screens.*
 import kotlinx.coroutines.launch
 
-sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    object Items : Screen("items", "Items", Icons.AutoMirrored.Outlined.List)
-    object Calendar : Screen("calendar", "Calendar", Icons.Outlined.CalendarMonth)
-    object Revision : Screen("revision", "Revision", Icons.Outlined.Style)
-    object Analytics : Screen("analytics", "Analytics", Icons.Outlined.Analytics)
-    object Settings : Screen("settings", "Settings", Icons.Outlined.Settings)
+sealed class Screen(val route: String, val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
+    object Items : Screen("items", "Items", Icons.Filled.Home, Icons.Outlined.Home)
+    object Revision : Screen("revision", "Revision", Icons.Filled.CheckCircle, Icons.Outlined.CheckCircle)
+    object Calendar : Screen("calendar", "Calendar", Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth)
+    object Analytics : Screen("analytics", "Analytics", Icons.Filled.CrisisAlert, Icons.Outlined.CrisisAlert)
+    object Settings : Screen("settings", "Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
 }
 
-val navItems = listOf(
+val headerNavItems = listOf(
     Screen.Items,
-    Screen.Calendar,
     Screen.Revision,
+    Screen.Calendar,
+    Screen.Analytics
+)
+val drawerNavItems = listOf(
+    Screen.Items,
+    Screen.Revision,
+    Screen.Calendar,
     Screen.Analytics,
     Screen.Settings
 )
@@ -131,15 +143,24 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
                         }
                         scope.launch { drawerState.close() }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Color.White.copy(alpha = 0.2f),
+                        selectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedIconColor = Color.White.copy(alpha = 0.6f),
+                        unselectedTextColor = Color.White.copy(alpha = 0.6f)
+                    )
                 )
 
                 allGroups.forEach { group ->
                     val groupItemCount = repositoryItems.filter { it.groupId == group.id }.size
+                    val isSelected = filterGroupId == group.id && isItemsScreen
                     NavigationDrawerItem(
                         label = { Text(group.name) },
                         icon = { Icon(Icons.Default.Folder, contentDescription = null) },
-                        selected = filterGroupId == group.id && isItemsScreen,
+                        selected = isSelected,
                         onClick = {
                             viewModel.updateFilterGroup(group.id)
                             navController.navigate(Screen.Items.route) {
@@ -150,7 +171,15 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
                             scope.launch { drawerState.close() }
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        badge = { Text(groupItemCount.toString(), style = MaterialTheme.typography.labelSmall) }
+                        badge = { Text(groupItemCount.toString(), style = MaterialTheme.typography.labelSmall, color = if(isSelected) Color.White else Color.White.copy(alpha = 0.6f)) },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color.White.copy(alpha = 0.2f),
+                            selectedIconColor = Color.White,
+                            selectedTextColor = Color.White,
+                            unselectedContainerColor = Color.Transparent,
+                            unselectedIconColor = Color.White.copy(alpha = 0.6f),
+                            unselectedTextColor = Color.White.copy(alpha = 0.6f)
+                        )
                     )
                 }
 
@@ -163,11 +192,11 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
                 )
 
-                navItems.forEach { screen ->
+                drawerNavItems.forEach { screen ->
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     NavigationDrawerItem(
                         label = { Text(screen.title) },
-                        icon = { Icon(screen.icon, contentDescription = screen.title) },
+                        icon = { Icon(if (selected) screen.selectedIcon else screen.unselectedIcon, contentDescription = screen.title) },
                         selected = selected,
                         onClick = {
                             navController.navigate(screen.route) {
@@ -179,7 +208,15 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
                             }
                             scope.launch { drawerState.close() }
                         },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Color.White.copy(alpha = 0.2f),
+                            selectedIconColor = Color.White,
+                            selectedTextColor = Color.White,
+                            unselectedContainerColor = Color.Transparent,
+                            unselectedIconColor = Color.White.copy(alpha = 0.6f),
+                            unselectedTextColor = Color.White.copy(alpha = 0.6f)
+                        )
                     )
                 }
             }
@@ -188,74 +225,128 @@ fun LexiconApp(viewModel: LexiconViewModel = viewModel()) {
         // App Content using CompositionLocal to allow screens to open the drawer
         CompositionLocalProvider(LocalDrawerState provides drawerState) {
             Scaffold(
+                containerColor = Color.Transparent,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        androidx.compose.ui.graphics.Brush.radialGradient(
+                            colors = listOf(Color(0xFF1B4E6B), Color(0xFF0A1823)),
+                            radius = 1500f
+                        )
+                    ),
                 bottomBar = {
-                    if (showBottomNav) {
-                        val navBarColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
-                        val selectedPillColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
-                        val selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        val defaultIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    val navBarColor = Color.White.copy(alpha = 0.1f)
+                    val glassBorder = Color.White.copy(alpha = 0.2f)
+                    val selectedIconColor = Color.White
+                    val defaultIconColor = Color.White.copy(alpha = 0.6f)
 
-                        Row(
-                            modifier = Modifier
-                                .navigationBarsPadding()
-                                .padding(horizontal = 24.dp, vertical = 24.dp)
-                                .fillMaxWidth()
-                                .height(68.dp)
-                                .shadow(elevation = 8.dp, shape = RoundedCornerShape(34.dp), spotColor = Color.Black.copy(alpha = 0.05f))
-                                .clip(RoundedCornerShape(34.dp))
-                                .background(navBarColor)
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), RoundedCornerShape(34.dp)),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            navItems.forEach { screen ->
-                                val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                                val color by androidx.compose.animation.animateColorAsState(
-                                    targetValue = if (selected) selectedIconColor else defaultIconColor,
-                                    animationSpec = androidx.compose.animation.core.tween(300),
-                                    label = "color"
-                                )
+                    val selectedIndex = headerNavItems.indexOfFirst { screen ->
+                        currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                    }.takeIf { it >= 0 } ?: 0
+
+                    val indicatorOffsetFraction by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue = selectedIndex.toFloat(),
+                        animationSpec = androidx.compose.animation.core.spring(
+                            dampingRatio = 0.7f,
+                            stiffness = 300f
+                        ),
+                        label = "indicatorOffset"
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (showBottomNav) {
+                            BoxWithConstraints(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(68.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(navBarColor)
+                                    .border(1.dp, glassBorder, RoundedCornerShape(50))
+                                    .padding(horizontal = 8.dp)
+                            ) {
+                                val itemWidth = maxWidth / headerNavItems.size
                                 
                                 Box(
                                     modifier = Modifier
-                                        .weight(1f)
                                         .fillMaxHeight()
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null
-                                        ) {
-                                            navController.navigate(screen.route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        },
+                                        .width(itemWidth)
+                                        .offset(x = itemWidth * indicatorOffsetFraction),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    val backgroundAlpha by androidx.compose.animation.core.animateFloatAsState(
-                                        targetValue = if (selected) 1f else 0f,
-                                        animationSpec = androidx.compose.animation.core.tween(300),
-                                        label = "alpha"
-                                    )
                                     Box(
                                         modifier = Modifier
-                                            .height(52.dp)
-                                            .fillMaxWidth(0.85f)
-                                            .clip(RoundedCornerShape(26.dp))
-                                            .background(selectedPillColor.copy(alpha = backgroundAlpha)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = screen.icon,
-                                            contentDescription = screen.title,
-                                            tint = color,
-                                            modifier = Modifier.size(26.dp)
+                                            .height(44.dp)
+                                            .width(56.dp)
+                                            .clip(RoundedCornerShape(50))
+                                            .background(Color.White.copy(alpha = 0.2f))
+                                    )
+                                }
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalArrangement = Arrangement.SpaceEvenly,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    headerNavItems.forEach { screen ->
+                                        val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                                        val color by androidx.compose.animation.animateColorAsState(
+                                            targetValue = if (selected) selectedIconColor else defaultIconColor,
+                                            animationSpec = androidx.compose.animation.core.tween(300),
+                                            label = "color"
                                         )
+                                        
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight()
+                                                .clickable(
+                                                    interactionSource = remember { MutableInteractionSource() },
+                                                    indication = null
+                                                ) {
+                                                    navController.navigate(screen.route) {
+                                                        popUpTo(navController.graph.findStartDestination().id) {
+                                                            saveState = true
+                                                        }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = if (selected) screen.selectedIcon else screen.unselectedIcon,
+                                                contentDescription = screen.title,
+                                                tint = color,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
+                            
+                            Spacer(modifier = Modifier.width(16.dp))
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(68.dp)
+                                .clip(CircleShape)
+                                .background(navBarColor)
+                                .border(1.dp, glassBorder, CircleShape)
+                                .clickable {
+                                    viewModel.setShowAddDialog(true)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Item", tint = Color.White, modifier = Modifier.size(28.dp))
                         }
                     }
                 }

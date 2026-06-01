@@ -30,6 +30,10 @@ class SettingsManager(context: Context) {
         get() = prefs.getString("custom_languages", "English,Bengali,Arabic,French,Spanish,German,Chinese,Japanese") ?: "English,Bengali,Arabic,French,Spanish,German,Chinese,Japanese"
         set(value) = prefs.edit().putString("custom_languages", value).apply()
 
+    var dailyReminder: Boolean
+        get() = prefs.getBoolean("daily_reminder", false)
+        set(value) = prefs.edit().putBoolean("daily_reminder", value).apply()
+
     var showBottomNav: Boolean
         get() = prefs.getBoolean("show_bottom_nav", true)
         set(value) = prefs.edit().putBoolean("show_bottom_nav", value).apply()
